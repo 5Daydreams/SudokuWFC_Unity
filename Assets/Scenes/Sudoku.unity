@@ -215,7 +215,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 844739227}
-  - component: {fileID: 844739228}
   m_Layer: 0
   m_Name: PlayerStats
   m_TagString: Untagged
@@ -237,20 +236,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &844739228
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 844739226}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 266acd3b0a1d4feb8b2aa38b09708c9c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  PlayerTime: {fileID: 11400000, guid: f8ee47adc65982948805e1c8515a34b4, type: 2}
-  ClickValue: {fileID: 11400000, guid: 132fdc4fc09e7784fb938f0664acd7ad, type: 2}
 --- !u!1001 &9135792598408547687
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2485,6 +2470,22 @@ PrefabInstance:
     - target: {fileID: 9135792597632457029, guid: 0aa5d515b10c5114ebcae69d3db84a24, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135792597633031866, guid: 0aa5d515b10c5114ebcae69d3db84a24, type: 3}
+      propertyPath: m_TotalMinSize.x
+      value: 601
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135792597633031866, guid: 0aa5d515b10c5114ebcae69d3db84a24, type: 3}
+      propertyPath: m_TotalMinSize.y
+      value: -2
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135792597633031866, guid: 0aa5d515b10c5114ebcae69d3db84a24, type: 3}
+      propertyPath: m_TotalPreferredSize.x
+      value: 601
+      objectReference: {fileID: 0}
+    - target: {fileID: 9135792597633031866, guid: 0aa5d515b10c5114ebcae69d3db84a24, type: 3}
+      propertyPath: m_TotalPreferredSize.y
+      value: -2
       objectReference: {fileID: 0}
     - target: {fileID: 9135792597849984206, guid: 0aa5d515b10c5114ebcae69d3db84a24, type: 3}
       propertyPath: m_AnchorMax.y
