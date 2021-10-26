@@ -9,16 +9,22 @@ public class BoardController : MonoBehaviour
 {
     [SerializeField] private GridLayoutGroup tileHolder;
     [SerializeField] private Tile tilePrefab;
+    [SerializeField] private int tilesToInitialize;
 
-    private Tile[,] boardTiles = new Tile[SUDOKU_BOARD_SIZE, SUDOKU_BOARD_SIZE];
+    private Tile[,] boardTiles;
     private const int SUDOKU_BOARD_SIZE = 9;
     private int random = 0;
 
     private void Awake()
     {
+        boardTiles = new Tile[SUDOKU_BOARD_SIZE, SUDOKU_BOARD_SIZE];
+        
         for (int i = 0; i < SUDOKU_BOARD_SIZE * SUDOKU_BOARD_SIZE; i++)
         {
             Tile newTile = Instantiate(tilePrefab, tileHolder.transform);
+            
+            newTile.InitializePossibleTileValuesLikeADumbIdiot();
+            
             boardTiles[i % 9, i / 9] = newTile;
         }
 
@@ -32,43 +38,114 @@ public class BoardController : MonoBehaviour
 
     private void InitializeAllTileValues()
     {
-        var randomList = GetRandomNumberList();
-        random = randomList.PopRandomElement();
-
+        List<int> preCollapseList = new List<int>();
+        
         for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
         {
             for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
             {
-                if (boardTiles[i, j].TileValue == 0)
+                Tile currentTile = boardTiles[i, j];
+                
+                if (currentTile.TileValue == 0)
                 {
-                    Vector2Int tilePos = new Vector2Int(i, j);
+                    preCollapseList = currentTile.GetPossibleTileValues();
 
-                    int attemptCounts = 0;
-
-                    while (!VerifyInput(random, tilePos))
-                    {
-                        random = randomList.PopRandomElement();
-                        attemptCounts++;
-
-                        if (randomList.Count == 0) // emergency exit condition
-                        {
-                            randomList = GetRandomNumberList();
-                            continue;
-                        }
-
-                        if (attemptCounts > 500)
-                        {
-                            return;
-                        }
-                    }
+                    random = preCollapseList.CopyRandomElement();
 
                     boardTiles[i, j].TileValue = random;
-                    InitializeAllTileValues();
+                    Vector2Int tilePos = new Vector2Int(i, j);
+                    
+                    LockBoardValues(random,tilePos);
+
+                    // InitializeAllTileValues();
                 }
             }
         }
     }
 
+    public void LockBoardValues(int value, Vector2Int gridPosition)
+    {
+        for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
+        {
+            for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
+            {
+                bool sameRowOrCollumn = (i == gridPosition.x) || (j == gridPosition.y);
+                
+                int xClusterStart = i % 3;
+                int xStart = i - xClusterStart;
+                int xFinish = i + (3 - xClusterStart);
+                
+                int yClusterStart = j % 3;
+                int yStart = j - yClusterStart;
+                int yFinish = j + (3 - yClusterStart);
+
+                bool xWithinCluster = xStart <= i && i < xFinish;
+                bool yWithinCluster = yStart <= j && j < yFinish;
+                bool withinClusterRange = xWithinCluster && yWithinCluster;
+                
+                if (sameRowOrCollumn || withinClusterRange)
+                {
+                    boardTiles[i,j].LockValue(value);
+                }
+            }
+        }
+        
+        bool VerifyHorizontal(int inputValue, Vector2Int tilePosition)
+        {
+            for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
+            {
+                if (inputValue == boardTiles[i, tilePosition.y].TileValue)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        bool VerifyVertical(int inputValue, Vector2Int tilePosition)
+        {
+            for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
+            {
+                if (inputValue == boardTiles[tilePosition.x, j].TileValue)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        bool VerifyCluster(int inputValue, Vector2Int tilePosition)
+        {
+            int xStartOffset = tilePosition.x % 3;
+            int yStartOffset = tilePosition.y % 3;
+
+            int xStart = tilePosition.x - xStartOffset;
+            int yStart = tilePosition.y - yStartOffset;
+            int xFinish = tilePosition.x + (3 - xStartOffset);
+            int yFinish = tilePosition.y + (3 - yStartOffset);
+
+            for (int i = xStart; i < xFinish; i++)
+            {
+                for (int j = yStart; j < yFinish; j++)
+                {
+                    if (inputValue == boardTiles[i, j].TileValue)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+    }
+
+    public void CollapseValueOnGeneration()
+    {
+        
+    }
+    
     public void TryInput(Vector2Int tilePosition)
     {
         int x = tilePosition.x;
@@ -88,6 +165,7 @@ public class BoardController : MonoBehaviour
         }
         else
         {
+            // write the current player selection into the clicked tile 
         }
     }
 
@@ -154,17 +232,5 @@ public class BoardController : MonoBehaviour
 
             return true;
         }
-    }
-
-    private List<int> GetRandomNumberList()
-    {
-        List<int> list1to9 = new List<int>();
-        
-        for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
-        {
-            list1to9.Add(i+1);
-        }
-
-        return list1to9;
     }
 }

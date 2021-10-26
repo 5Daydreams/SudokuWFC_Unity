@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public static class ListExtension
 {
@@ -25,9 +27,28 @@ public static class ListExtension
 
     public static T PopRandomElement<T>(this IList<T> list)
     {
+        if (list.Count == 0)
+        {
+            Debug.LogError("Received empty list");
+            throw new Exception();
+        }
+        
         int randomIndex = Random.Range(0, list.Count);
         T poppedElement = list[randomIndex];
         list.RemoveAt(randomIndex);
+        return poppedElement;
+    }
+    
+    public static T CopyRandomElement<T>(this IList<T> list)
+    {
+        if (list.Count == 0)
+        {
+            Debug.LogError("Received empty list");
+            throw new Exception();
+        }
+        
+        int randomIndex = Random.Range(0, list.Count);
+        T poppedElement = list[randomIndex];
         return poppedElement;
     }
 }
