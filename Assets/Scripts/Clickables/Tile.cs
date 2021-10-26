@@ -33,7 +33,7 @@ public class Tile : MonoBehaviour
         _button.onClick.AddListener(RefreshText);
     }
 
-    public void InitializePossibleTileValuesLikeADumbIdiot()
+    public void OpenAllPossibleTileValues()
     {
         for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
         {
@@ -64,15 +64,10 @@ public class Tile : MonoBehaviour
         
         for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
         {
-            if (openValues[i] == true)
+            if (openValues[i])
             {
                 possibleTileValues.Add(i+1);
             }
-        }
-
-        if (possibleTileValues.Count == 0)
-        {
-            Debug.LogError("Dear Unity, you are fucking retarded");
         }
 
         return possibleTileValues;

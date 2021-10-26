@@ -30,7 +30,7 @@ public static class ListExtension
         if (list.Count == 0)
         {
             Debug.LogError("Received empty list");
-            throw new Exception();
+            throw new Exception("Method Cannot run on empty list");
         }
         
         int randomIndex = Random.Range(0, list.Count);
@@ -44,7 +44,7 @@ public static class ListExtension
         if (list.Count == 0)
         {
             Debug.LogError("Received empty list");
-            throw new Exception();
+            throw new Exception("Method Cannot run on empty list");
         }
         
         int randomIndex = Random.Range(0, list.Count);
