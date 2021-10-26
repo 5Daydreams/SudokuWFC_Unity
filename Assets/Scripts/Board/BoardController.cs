@@ -10,7 +10,7 @@ public class BoardController : MonoBehaviour
     [SerializeField] private GridLayoutGroup tileHolder;
     [SerializeField] private Tile tilePrefab;
 
-    private List<Tile> boardTiles = new List<Tile>(SUDOKU_BOARD_SIZE * SUDOKU_BOARD_SIZE);
+    private Tile[,] boardTiles = new Tile[SUDOKU_BOARD_SIZE, SUDOKU_BOARD_SIZE];
     private const int SUDOKU_BOARD_SIZE = 9;
     private int random = 0;
 
@@ -19,8 +19,7 @@ public class BoardController : MonoBehaviour
         for (int i = 0; i < SUDOKU_BOARD_SIZE * SUDOKU_BOARD_SIZE; i++)
         {
             Tile newTile = Instantiate(tilePrefab, tileHolder.transform);
-            boardTiles.Add(newTile);
-            newTile.TilePosition = new Vector2Int(i % 9, i / 9);
+            boardTiles[i % 9, i / 9] = newTile;
         }
 
         foreach (var tile in boardTiles)
@@ -40,7 +39,7 @@ public class BoardController : MonoBehaviour
         {
             for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
             {
-                if (boardTiles[i + j * SUDOKU_BOARD_SIZE].TileValue == 0)
+                if (boardTiles[i, j].TileValue == 0)
                 {
                     Vector2Int tilePos = new Vector2Int(i, j);
 
@@ -63,7 +62,7 @@ public class BoardController : MonoBehaviour
                         }
                     }
 
-                    boardTiles[i + j * SUDOKU_BOARD_SIZE].TileValue = random;
+                    boardTiles[i, j].TileValue = random;
                     InitializeAllTileValues();
                 }
             }
@@ -74,7 +73,7 @@ public class BoardController : MonoBehaviour
     {
         int x = tilePosition.x;
         int y = tilePosition.y;
-        int inputValue = boardTiles[x + y * SUDOKU_BOARD_SIZE].TileValue;
+        int inputValue = boardTiles[x, y].TileValue;
 
         if (inputValue <= 0) // input == 0 means empty tile
         {
@@ -110,7 +109,7 @@ public class BoardController : MonoBehaviour
         {
             for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
             {
-                if (inputValue == boardTiles[i + tilePosition.y * SUDOKU_BOARD_SIZE].TileValue)
+                if (inputValue == boardTiles[i, tilePosition.y].TileValue)
                 {
                     return false;
                 }
@@ -123,7 +122,7 @@ public class BoardController : MonoBehaviour
         {
             for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
             {
-                if (inputValue == boardTiles[tilePosition.x + j * SUDOKU_BOARD_SIZE].TileValue)
+                if (inputValue == boardTiles[tilePosition.x, j].TileValue)
                 {
                     return false;
                 }
@@ -146,7 +145,7 @@ public class BoardController : MonoBehaviour
             {
                 for (int j = yStart; j < yFinish; j++)
                 {
-                    if (inputValue == boardTiles[i + j * SUDOKU_BOARD_SIZE].TileValue)
+                    if (inputValue == boardTiles[i, j].TileValue)
                     {
                         return false;
                     }

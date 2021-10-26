@@ -8,7 +8,6 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Button))]
 public class Tile : MonoBehaviour
 {
-    [HideInInspector] public Vector2Int TilePosition = new Vector2Int();
     private int tileValue = 0;
     private Button _button;
     private Text _text;
