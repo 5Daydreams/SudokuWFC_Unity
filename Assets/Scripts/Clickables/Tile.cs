@@ -12,15 +12,50 @@ public class Tile : MonoBehaviour
     private bool[] openValues = new bool[SUDOKU_BOARD_SIZE];
     private Button _button;
     private Text _text;
-    
+
+    public bool correctlyAssigned = false;
+    public bool CorrectlyAssigned => correctlyAssigned;
+
     private const int SUDOKU_BOARD_SIZE = 9;
-    
+
     public int TileValue
     {
         get => tileValue;
 
         set
         {
+            if (CorrectlyAssigned)
+            {
+                Debug.LogWarning("Trying to set value of correct cell at: " + this.gameObject.name);
+                return;
+            }
+            
+            bool inputIsNotEmpty = value != 0;
+
+            if (inputIsNotEmpty)
+            {
+                bool inputUnavailable = !openValues[value - 1];
+                
+                if (inputUnavailable)
+                {
+                    Debug.LogError("Attempting to set an unavailable value");
+                    return;
+                }
+
+                for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
+                {
+                    if (i == value - 1)
+                    {
+                        openValues[i] = true;
+                        continue;
+                    }
+
+                    openValues[i] = false;
+                }
+
+                correctlyAssigned = true;
+            }
+
             tileValue = value;
             RefreshText();
         }
@@ -33,14 +68,16 @@ public class Tile : MonoBehaviour
         _button.onClick.AddListener(RefreshText);
     }
 
-    public void OpenAllPossibleTileValues()
+    public void InitializeTile()
     {
+        TileValue = 0;
+        correctlyAssigned = false;
         for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
         {
             openValues[i] = true;
         }
     }
-    
+
     private void RefreshText()
     {
         if (tileValue > 0)
@@ -55,18 +92,30 @@ public class Tile : MonoBehaviour
 
     public void LockValue(int value)
     {
+        if (this.CorrectlyAssigned)
+        {
+            return;
+        }
+
+        Debug.Log("Locking the value: " + value + " from tile " + this.gameObject.name);
         openValues[value - 1] = false;
     }
 
     public List<int> GetPossibleTileValues()
     {
         List<int> possibleTileValues = new List<int>();
-        
+        bool tileIsWeird = CorrectlyAssigned && possibleTileValues.Count > 1;
+
+        if (tileIsWeird)
+        {
+            Debug.LogWarning("Tile has weird values: " + this.gameObject.name);
+        }
+
         for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
         {
             if (openValues[i])
             {
-                possibleTileValues.Add(i+1);
+                possibleTileValues.Add(i + 1);
             }
         }
 

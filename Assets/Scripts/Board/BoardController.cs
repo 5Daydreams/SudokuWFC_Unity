@@ -13,7 +13,6 @@ public class BoardController : MonoBehaviour
 
     private Tile[,] boardTiles;
     private const int SUDOKU_BOARD_SIZE = 9;
-    private int random = 0;
 
     private void Awake()
     {
@@ -23,8 +22,7 @@ public class BoardController : MonoBehaviour
         {
             Tile newTile = Instantiate(tilePrefab, tileHolder.transform);
 
-            newTile.OpenAllPossibleTileValues();
-            newTile.TileValue = 0;
+            newTile.InitializeTile();
 
             newTile.gameObject.name = "(" + i % 9 + "," + i / 9 + ")";
 
@@ -37,6 +35,7 @@ public class BoardController : MonoBehaviour
     private void InitializeAllTileValues()
     {
         List<int> preCollapseList = new List<int>();
+        int random = 0;
 
         for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
         {
@@ -47,19 +46,6 @@ public class BoardController : MonoBehaviour
                 if (currentTile.TileValue == 0)
                 {
                     preCollapseList = currentTile.GetPossibleTileValues();
-                    
-                    // must add a check to see if choosing this particular value nullifies neighbouring cells.
-                    // idea: loop on i,j and clusters, find "extreme values"
-                        // (numbers that must not be chosen) and ignore them.
-                    // to define extreme values, I could lower the probability of choosing a given N
-                        // based on how many times it already was chosen
-                        
-                        
-                    // Brainstorm: the algorithm will always break on a number which was NOT previously chosen,
-                    // therefore, forcing repetition seems to be a good idea?? Maybe??
-                    
-                    // Alternatively, I could just look more closely into a WFC implementation,
-                        // but lets try to be raw first
 
                     if (preCollapseList.Count == 0)
                     {
@@ -71,6 +57,7 @@ public class BoardController : MonoBehaviour
                     boardTiles[i, j].TileValue = random;
                     Vector2Int tilePos = new Vector2Int(i, j);
 
+                    CheckBoardValidity();
                     LockBoardValues(random, tilePos);
                 }
             }
@@ -79,13 +66,19 @@ public class BoardController : MonoBehaviour
 
     public void LockBoardValues(int value, Vector2Int gridPosition)
     {
-        // Coarse lock
         for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
         {
             for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
             {
+                bool isCurrentTile = i == gridPosition.x && j == gridPosition.y;
+
+                if (isCurrentTile)
+                {
+                    continue;
+                }
+
                 bool sameRowOrCollumn = (j == gridPosition.y) || (i == gridPosition.x);
-                
+
                 int xClusterStart = gridPosition.x % 3;
                 int xStart = gridPosition.x - xClusterStart;
                 int xFinish = gridPosition.x + (3 - xClusterStart);
@@ -104,16 +97,27 @@ public class BoardController : MonoBehaviour
                 }
             }
         }
-        
-        
-        // // Smart lock
-        // for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
-        // {
-        //     for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
-        //     {
-        //         // Code yet to be implemented
-        //     }
-        // }
+    }
+    
+    private void CheckBoardValidity() 
+    {
+        // 1. Loop through the board,
+        // 2. Look for tiles with only one valid entry,
+        // 3. Block relevant linked tiles from said value 
+        for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
+        {
+            for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
+            {
+                int currentTileOpenValues = boardTiles[i, j].GetPossibleTileValues().Count;
+
+                if (currentTileOpenValues == 1 && !boardTiles[i,j].CorrectlyAssigned)
+                {
+                    int tileValue = boardTiles[i, j].GetPossibleTileValues()[0];
+                    Vector2Int tilePos = new Vector2Int(i, j);
+                    LockBoardValues(tileValue,tilePos);
+                }
+            }
+        }
     }
 
     public void TryInput(Vector2Int tilePosition)
