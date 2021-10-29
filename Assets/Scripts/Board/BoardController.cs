@@ -106,7 +106,7 @@ public class BoardController : MonoBehaviour
                 {
                     List<int> linkedCellOpenValues = boardTiles[i, j].GetOpenValuesList();
 
-                    bool linkedCellHasPriority = linkedCellOpenValues.Count < 3; // currentTileOpenValues.Count;
+                    bool linkedCellHasPriority = linkedCellOpenValues.Count < 2; // currentTileOpenValues.Count;
 
                     if (!linkedCellHasPriority)
                     {
