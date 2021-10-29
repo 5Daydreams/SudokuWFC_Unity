@@ -90,18 +90,36 @@ public class Tile : MonoBehaviour
         }
     }
 
-    public void LockValue(int value)
+    public void LockValue(int value, bool printValues = false)
     {
         if (this.CorrectlyAssigned)
         {
             return;
         }
-
-        Debug.Log("Locking the value: " + value + " from tile " + this.gameObject.name);
+        
         openValues[value - 1] = false;
+
+        if (printValues)
+        {
+            PrintOpenValues();
+        }
     }
 
-    public List<int> GetPossibleTileValues()
+    public void PrintOpenValues()
+    {
+        string openNumbersString = "";
+
+        List<int> openNumbersList = GetOpenValuesList();
+
+        for (int i = 0; i < openNumbersList.Count; i++)
+        {
+            openNumbersString += openNumbersList[i] + ",";
+        }
+        
+        Debug.Log(this.gameObject.name + " has the following values open: " + openNumbersString);
+    }
+
+    public List<int> GetOpenValuesList()
     {
         List<int> possibleTileValues = new List<int>();
         bool tileIsWeird = CorrectlyAssigned && possibleTileValues.Count > 1;

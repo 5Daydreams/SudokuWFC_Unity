@@ -21,9 +21,7 @@ public class BoardController : MonoBehaviour
         for (int i = 0; i < SUDOKU_BOARD_SIZE * SUDOKU_BOARD_SIZE; i++)
         {
             Tile newTile = Instantiate(tilePrefab, tileHolder.transform);
-
             newTile.InitializeTile();
-
             newTile.gameObject.name = "(" + i % 9 + "," + i / 9 + ")";
 
             boardTiles[i % 9, i / 9] = newTile;
@@ -34,8 +32,9 @@ public class BoardController : MonoBehaviour
 
     private void InitializeAllTileValues()
     {
-        List<int> preCollapseList = new List<int>();
+        List<int> currentTilePossibleValues = new List<int>();
         int random = 0;
+        Vector2Int currentTilePos = new Vector2Int(0, 0);
 
         for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
         {
@@ -45,22 +44,109 @@ public class BoardController : MonoBehaviour
 
                 if (currentTile.TileValue == 0)
                 {
-                    preCollapseList = currentTile.GetPossibleTileValues();
+                    // Once in an empty tile, check all linked tiles for priority values
 
-                    if (preCollapseList.Count == 0)
+                    currentTilePos.x = i;
+                    currentTilePos.y = j;
+
+                    currentTile.PrintOpenValues();
+                    currentTilePossibleValues = CheckForPriorityValues(currentTilePos);
+
+                    if (currentTilePossibleValues.Count == 0)
                     {
                         Debug.LogError("Algorithm got empty list on index " + i + "," + j);
                     }
 
-                    random = preCollapseList.CopyRandomElement();
+                    random = currentTilePossibleValues.CopyRandomElement();
 
-                    boardTiles[i, j].TileValue = random;
-                    Vector2Int tilePos = new Vector2Int(i, j);
+                    currentTile.TileValue = random;
+                    RefreshBoardOpenValues();
+                    currentTile.PrintOpenValues();
 
-                    CheckBoardValidity();
-                    LockBoardValues(random, tilePos);
+                    // Vector2Int tilePos = new Vector2Int(i, j);
+                    //
+                    // CheckBoardValidity();
+                    // LockBoardValues(random, tilePos);
                 }
             }
+        }
+    }
+
+    private void RefreshBoardOpenValues()
+    {
+        for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
+        {
+            for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
+            {
+                Vector2Int tilePos = new Vector2Int(i, j);
+                CheckForPriorityValues(tilePos);
+            }
+        }
+    }
+
+    private List<int> CheckForPriorityValues(Vector2Int gridPosition)
+    {
+        Tile currentTile = boardTiles[gridPosition.x, gridPosition.y];
+        List<int> currentTileOpenValues = currentTile.GetOpenValuesList();
+
+        for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
+        {
+            for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
+            {
+                bool isCurrentTile = i == gridPosition.x && j == gridPosition.y;
+
+                if (isCurrentTile)
+                {
+                    continue;
+                }
+
+                bool ijTileIsLinked = CheckIfLinkedToCurrentTile(i,j);
+
+                if (ijTileIsLinked)
+                {
+                    List<int> linkedCellOpenValues = boardTiles[i, j].GetOpenValuesList();
+
+                    bool linkedCellHasPriority = linkedCellOpenValues.Count < 3; // currentTileOpenValues.Count;
+
+                    if (!linkedCellHasPriority)
+                    {
+                        continue;
+                    }
+
+                    foreach (int openNumber in linkedCellOpenValues)
+                    {
+                        if (currentTileOpenValues.Contains(openNumber))
+                        {
+                            currentTile.LockValue(openNumber);
+                        }
+                    }
+                }
+            }
+        }
+
+        List<int> priorityValues = currentTile.GetOpenValuesList();
+
+        return priorityValues;
+
+        bool CheckIfLinkedToCurrentTile(int i, int j)
+        {
+            bool sameRowOrCollumn = (j == gridPosition.y) || (i == gridPosition.x);
+
+            int xClusterStart = gridPosition.x % 3;
+            int xStart = gridPosition.x - xClusterStart;
+            int xFinish = gridPosition.x + (3 - xClusterStart);
+
+            int yClusterStart = gridPosition.y % 3;
+            int yStart = gridPosition.y - yClusterStart;
+            int yFinish = gridPosition.y + (3 - yClusterStart);
+
+            bool xWithinCluster = xStart <= i && i < xFinish;
+            bool yWithinCluster = yStart <= j && j < yFinish;
+            bool withinClusterRange = xWithinCluster && yWithinCluster;
+
+            bool isLinkedToCurrentTile = sameRowOrCollumn || withinClusterRange;
+
+            return isLinkedToCurrentTile;
         }
     }
 
@@ -98,23 +184,24 @@ public class BoardController : MonoBehaviour
             }
         }
     }
-    
-    private void CheckBoardValidity() 
+
+    private void CheckBoardValidity()
     {
-        // 1. Loop through the board,
+        // 1. Loop through the whole board,
         // 2. Look for tiles with only one valid entry,
-        // 3. Block relevant linked tiles from said value 
+        // 3. Block relevant linked tiles from said value
+
         for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
         {
             for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
             {
-                int currentTileOpenValues = boardTiles[i, j].GetPossibleTileValues().Count;
+                int currentTileOpenValues = boardTiles[i, j].GetOpenValuesList().Count;
 
-                if (currentTileOpenValues == 1 && !boardTiles[i,j].CorrectlyAssigned)
+                if (currentTileOpenValues == 1 && !boardTiles[i, j].CorrectlyAssigned)
                 {
-                    int tileValue = boardTiles[i, j].GetPossibleTileValues()[0];
+                    int tileValue = boardTiles[i, j].GetOpenValuesList()[0];
                     Vector2Int tilePos = new Vector2Int(i, j);
-                    LockBoardValues(tileValue,tilePos);
+                    LockBoardValues(tileValue, tilePos);
                 }
             }
         }
