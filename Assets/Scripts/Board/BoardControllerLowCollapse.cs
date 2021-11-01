@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-public class BoardControllerV2 : MonoBehaviour
+public class BoardControllerLowCollapse : MonoBehaviour
 {
     [SerializeField] private GridLayoutGroup tileHolder;
     [SerializeField] private Tile tilePrefab;
@@ -13,9 +13,12 @@ public class BoardControllerV2 : MonoBehaviour
 
     private Tile[,] boardTiles;
     private const int SUDOKU_BOARD_SIZE = 9;
+    private const int recursionLimit = 500;
+    private int recursionCounter = 0;
 
     private void Awake()
     {
+        recursionCounter = 0;
         boardTiles = new Tile[SUDOKU_BOARD_SIZE, SUDOKU_BOARD_SIZE];
 
         for (int i = 0; i < SUDOKU_BOARD_SIZE * SUDOKU_BOARD_SIZE; i++)
@@ -32,6 +35,7 @@ public class BoardControllerV2 : MonoBehaviour
 
     private void InitializeAllTileValues()
     {
+        recursionCounter++;
         Tile selectedTile = null;
         Vector2Int selectedTilePos = new Vector2Int();
         
@@ -49,6 +53,7 @@ public class BoardControllerV2 : MonoBehaviour
 
                 if (tileIsAlreadyAssigned)
                 {
+                    LockValuesOnLinkedTiles(currentTile.TileValue, i,j);
                     continue;
                 }
                 
@@ -70,11 +75,17 @@ public class BoardControllerV2 : MonoBehaviour
             return;
         }
 
+        if (recursionCounter > recursionLimit)
+        {
+            Debug.LogError("Reached recursion limit");
+            return;
+        }
+
         int collapsedValue = selectedTile.GetOpenValuesList().CopyRandomElement();
         selectedTile.TileValue = collapsedValue;
         LockValuesOnLinkedTiles(collapsedValue, selectedTilePos);
 
-        InitializeAllTileValues(); // Yes, we want to recurse
+        InitializeAllTileValues(); // Loop all over again after setting one value
     }
 
     private void LockValuesOnLinkedTiles(int inputValue, Vector2Int tilePos)

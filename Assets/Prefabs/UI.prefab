@@ -688,6 +688,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9135792597796124210}
   - component: {fileID: 9135792597796124209}
+  - component: {fileID: 4668749959171152795}
   m_Layer: 5
   m_Name: GridHolder
   m_TagString: Untagged
@@ -731,6 +732,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tileHolder: {fileID: 9135792597633031866}
   tilePrefab: {fileID: 8899017505236450398, guid: 4f3f6a686f5737d4d8b42f9a13ccfb80, type: 3}
+  tilesToInitialize: 0
+--- !u!114 &4668749959171152795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9135792597796124211}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddf858e988e64ea89f62c8270f5b47e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileHolder: {fileID: 9135792597633031866}
+  tilePrefab: {fileID: 8899017505236450398, guid: 4f3f6a686f5737d4d8b42f9a13ccfb80, type: 3}
+  tilesToInitialize: 0
 --- !u!1 &9135792597849984207
 GameObject:
   m_ObjectHideFlags: 0
