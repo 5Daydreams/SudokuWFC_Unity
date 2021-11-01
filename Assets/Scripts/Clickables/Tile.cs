@@ -13,7 +13,7 @@ public class Tile : MonoBehaviour
     private Button _button;
     private Text _text;
 
-    public bool correctlyAssigned = false;
+    private bool correctlyAssigned = false;
     public bool CorrectlyAssigned => correctlyAssigned;
 
     private const int SUDOKU_BOARD_SIZE = 9;

@@ -42,7 +42,7 @@ public class BoardController : MonoBehaviour
             {
                 Tile currentTile = boardTiles[i, j];
 
-                if (currentTile.TileValue == 0)
+                if (!currentTile.CorrectlyAssigned)
                 {
                     // Once in an empty tile, check all linked tiles for priority values
 
@@ -50,7 +50,10 @@ public class BoardController : MonoBehaviour
                     currentTilePos.y = j;
 
                     currentTile.PrintOpenValues();
+                    RefreshBoardOpenValues();
+                    
                     currentTilePossibleValues = CheckForPriorityValues(currentTilePos);
+                    // currentTilePossibleValues = currentTile.GetOpenValuesList();
 
                     if (currentTilePossibleValues.Count == 0)
                     {
@@ -60,7 +63,6 @@ public class BoardController : MonoBehaviour
                     random = currentTilePossibleValues.CopyRandomElement();
 
                     currentTile.TileValue = random;
-                    RefreshBoardOpenValues();
                     currentTile.PrintOpenValues();
 
                     // Vector2Int tilePos = new Vector2Int(i, j);
@@ -78,6 +80,19 @@ public class BoardController : MonoBehaviour
         {
             for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
             {
+                if (boardTiles[i, j].CorrectlyAssigned)
+                {
+                    continue;
+                }
+
+                List<int> openValuesList = boardTiles[i, j].GetOpenValuesList();
+                bool onlyOneValue = openValuesList.Count == 1;
+
+                if (onlyOneValue)
+                {
+                    boardTiles[i, j].TileValue = openValuesList[0];
+                }
+
                 Vector2Int tilePos = new Vector2Int(i, j);
                 CheckForPriorityValues(tilePos);
             }
@@ -100,13 +115,13 @@ public class BoardController : MonoBehaviour
                     continue;
                 }
 
-                bool ijTileIsLinked = CheckIfLinkedToCurrentTile(i,j);
+                bool ijTileIsLinked = CheckIfLinkedToCurrentTile(i, j);
 
                 if (ijTileIsLinked)
                 {
                     List<int> linkedCellOpenValues = boardTiles[i, j].GetOpenValuesList();
 
-                    bool linkedCellHasPriority = linkedCellOpenValues.Count < 2; // currentTileOpenValues.Count;
+                    bool linkedCellHasPriority = linkedCellOpenValues.Count == 1;
 
                     if (!linkedCellHasPriority)
                     {
