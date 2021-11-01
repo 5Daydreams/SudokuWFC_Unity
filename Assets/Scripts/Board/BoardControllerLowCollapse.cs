@@ -33,18 +33,23 @@ public class BoardControllerLowCollapse : MonoBehaviour
         InitializeAllTileValues();
     }
 
+    private void AbortAndRestart()
+    {
+        for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
+        {
+            for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
+            {
+                Destroy(boardTiles[i, j].gameObject);
+            }
+        }
+        Awake();
+    }
+
     private void Update()
     {
         if (Input.GetMouseButtonDown(1))
         {
-            for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
-            {
-                for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
-                {
-                    Destroy(boardTiles[i, j].gameObject);
-                }
-            }
-            Awake();
+            AbortAndRestart();
         }
         
         if (!mouseDebug)
@@ -173,6 +178,7 @@ public class BoardControllerLowCollapse : MonoBehaviour
             if (openValues.Count == 0)
             {
                 Debug.LogError("Found an empty list on Tile: " + i + "," + j);
+                AbortAndRestart();
             }
             
             int randomIndex = Random.Range(0, openValues.Count);
