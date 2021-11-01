@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 public class BoardControllerLowCollapse : MonoBehaviour
 {
     [SerializeField] private GridLayoutGroup tileHolder;
     [SerializeField] private Tile tilePrefab;
     [SerializeField] private int tilesToInitialize;
+    [SerializeField] private bool mouseDebug;
+    [SerializeField] private float debugInterval = 1.0f;
 
     private Tile[,] boardTiles;
     private const int SUDOKU_BOARD_SIZE = 9;
     private const int recursionLimit = 500;
     private int recursionCounter = 0;
+    private float timerInternal = 0;
 
     private void Awake()
     {
@@ -33,12 +33,44 @@ public class BoardControllerLowCollapse : MonoBehaviour
         InitializeAllTileValues();
     }
 
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
+            {
+                for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
+                {
+                    Destroy(boardTiles[i, j].gameObject);
+                }
+            }
+            Awake();
+        }
+        
+        if (!mouseDebug)
+        {
+            return;
+        }
+
+        timerInternal -= Time.deltaTime;
+
+        if (Input.GetMouseButton(0) && timerInternal < 0)
+        {
+            ContinueIteration();
+            timerInternal = debugInterval;
+        }
+    }
+
+    private void ContinueIteration()
+    {
+        InitializeAllTileValues();
+    }
+
     private void InitializeAllTileValues()
     {
-        recursionCounter++;
         Tile selectedTile = null;
         Vector2Int selectedTilePos = new Vector2Int();
-        
+
         int lowestOpenValues = 10;
 
         for (int i = 0; i < SUDOKU_BOARD_SIZE; i++)
@@ -46,23 +78,23 @@ public class BoardControllerLowCollapse : MonoBehaviour
             for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
             {
                 Tile currentTile = boardTiles[i, j];
-
-                int currentTileOpenValues = currentTile.GetOpenValuesList().Count;
-
+                
                 bool tileIsAlreadyAssigned = currentTile.CorrectlyAssigned;
 
                 if (tileIsAlreadyAssigned)
                 {
-                    LockValuesOnLinkedTiles(currentTile.TileValue, i,j);
+                    LockValuesOnLinkedTiles(currentTile.TileValue, i, j);
                     continue;
                 }
+
+                int currentTileOpenValues = currentTile.GetOpenValuesList().Count;
                 
                 bool currentTileHasFewerOpenValues = currentTileOpenValues < lowestOpenValues;
 
                 if (currentTileHasFewerOpenValues)
                 {
                     lowestOpenValues = currentTileOpenValues;
-                    
+
                     selectedTile = currentTile;
                     selectedTilePos.x = i;
                     selectedTilePos.y = j;
@@ -75,17 +107,86 @@ public class BoardControllerLowCollapse : MonoBehaviour
             return;
         }
 
+        int collapsedValue = GetFilteredValue(selectedTilePos);
+        
+        selectedTile.TileValue = collapsedValue;
+        LockValuesOnLinkedTiles(collapsedValue, selectedTilePos);
+
         if (recursionCounter > recursionLimit)
         {
             Debug.LogError("Reached recursion limit");
             return;
         }
 
-        int collapsedValue = selectedTile.GetOpenValuesList().CopyRandomElement();
-        selectedTile.TileValue = collapsedValue;
-        LockValuesOnLinkedTiles(collapsedValue, selectedTilePos);
+        if (mouseDebug)
+        {
+            return;
+        }
 
+        recursionCounter++;
+        
         InitializeAllTileValues(); // Loop all over again after setting one value
+    }
+
+    private int GetFilteredValue(int i, int j)
+    {
+        // 1.1. Given a tile, find its open values
+        List<int> openValues = boardTiles[i,j].GetOpenValuesList();
+        List<Tile> linkedTiles = GetLinkedTiles(i,j);
+
+        int mostFrequentCount = 0;
+        List<int> chosenIndexes = new List<int>();
+        List<int> openValuePriorityCounters = new List<int>();
+
+        for (int k = 0; k < openValues.Count; k++)
+        {
+            int currentNumber = openValues[k];
+            openValuePriorityCounters.Add(0);
+            
+            foreach (Tile tile in linkedTiles)
+            {
+                // 2. Given those open values, find which of them are LOCKED on linked tiles
+                bool tileDoesNotContainTheSelectedValue = !tile.GetOpenValuesList().Contains(currentNumber);
+                
+                if (tileDoesNotContainTheSelectedValue) 
+                {
+                    // 3. The value which is LOCKED on the most linked cells should be the picked value.
+                    openValuePriorityCounters[k]++;
+                }
+            }
+
+            if (openValuePriorityCounters[k] > mostFrequentCount)
+            {
+                mostFrequentCount = openValuePriorityCounters[k];
+                chosenIndexes.Clear();
+                chosenIndexes.Add(k);
+            }
+
+            if (openValuePriorityCounters[k] == mostFrequentCount)
+            {
+                chosenIndexes.Add(k);
+            }
+        }
+
+        if (chosenIndexes.Count == 0)
+        {
+            if (openValues.Count == 0)
+            {
+                Debug.LogError("Found an empty list on Tile: " + i + "," + j);
+            }
+            
+            int randomIndex = Random.Range(0, openValues.Count);
+            chosenIndexes.Add(randomIndex);
+        }
+
+        int chosenIndex = chosenIndexes.CopyRandomElement();
+
+        return openValues[chosenIndex];
+    }
+    
+    private int GetFilteredValue(Vector2Int tilePos)
+    {
+        return GetFilteredValue(tilePos.x, tilePos.y);
     }
 
     private void LockValuesOnLinkedTiles(int inputValue, Vector2Int tilePos)
@@ -97,8 +198,8 @@ public class BoardControllerLowCollapse : MonoBehaviour
             tile.LockValue(inputValue);
         }
     }
-    
-    private void LockValuesOnLinkedTiles(int inputValue,int i, int j)
+
+    private void LockValuesOnLinkedTiles(int inputValue, int i, int j)
     {
         Vector2Int tilePos = new Vector2Int(i, j);
         LockValuesOnLinkedTiles(inputValue, tilePos);
@@ -112,6 +213,13 @@ public class BoardControllerLowCollapse : MonoBehaviour
         {
             for (int j = 0; j < SUDOKU_BOARD_SIZE; j++)
             {
+                bool isOriginalTile = gridPosition.x == i && gridPosition.y == j;
+                
+                if (isOriginalTile)
+                {
+                    continue;
+                }
+                
                 bool sameRowOrCollumn = (j == gridPosition.y) || (i == gridPosition.x);
 
                 int xClusterStart = gridPosition.x % 3;
@@ -127,7 +235,7 @@ public class BoardControllerLowCollapse : MonoBehaviour
                 bool withinClusterRange = xWithinCluster && yWithinCluster;
 
                 bool isLinkedToCurrentTile = sameRowOrCollumn || withinClusterRange;
-                
+
                 if (isLinkedToCurrentTile)
                 {
                     Tile currentTile = boardTiles[i, j];
@@ -138,7 +246,7 @@ public class BoardControllerLowCollapse : MonoBehaviour
 
         return positionList;
     }
-    
+
     private List<Tile> GetLinkedTiles(int i, int j)
     {
         Vector2Int gridPosition = new Vector2Int(i, j);

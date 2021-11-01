@@ -307,6 +307,18 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4668749959171152795, guid: 0aa5d515b10c5114ebcae69d3db84a24, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4668749959171152795, guid: 0aa5d515b10c5114ebcae69d3db84a24, type: 3}
+      propertyPath: mouseDebug
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4668749959171152795, guid: 0aa5d515b10c5114ebcae69d3db84a24, type: 3}
+      propertyPath: debugInterval
+      value: 0.04
+      objectReference: {fileID: 0}
     - target: {fileID: 5148855846821446143, guid: 0aa5d515b10c5114ebcae69d3db84a24, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

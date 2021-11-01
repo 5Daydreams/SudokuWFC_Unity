@@ -1,9 +1,6 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 public class BoardController : MonoBehaviour
 {
@@ -55,6 +52,7 @@ public class BoardController : MonoBehaviour
                     currentTilePossibleValues = CheckForPriorityValues(currentTilePos);
                     // currentTilePossibleValues = currentTile.GetOpenValuesList();
 
+                    
                     if (currentTilePossibleValues.Count == 0)
                     {
                         Debug.LogError("Algorithm got empty list on index " + i + "," + j);
