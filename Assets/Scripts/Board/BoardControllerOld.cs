@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BoardController : MonoBehaviour
+public class BoardControllerOld : MonoBehaviour
 {
     [SerializeField] private GridLayoutGroup tileHolder;
     [SerializeField] private Tile tilePrefab;
