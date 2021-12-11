@@ -1,13 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class SimpleValue<T> : ScriptableObject
+namespace SimpleValues
 {
-    public T Value;
-
-    public virtual void SetValue(T newValue)
+    public abstract class SimpleValue<T> : ScriptableObject
     {
-        Value = newValue;
+        public T Value;
+
+        public virtual void SetValue(T newValue)
+        {
+            Value = newValue;
+        }
     }
 }

@@ -1,11 +1,14 @@
 ﻿using System;
-using SimpleValues;
+using _Code.Toolbox.Extensions;
+using Trackables;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public class MatchTimer : MonoBehaviour
 {
-    [SerializeField] private FloatValue PlayerTime;
+    [SerializeField] private TrackableFloat _playerTime;
+    [SerializeField] private Text _textBox;
     [SerializeField] private bool startOnAwake = false;
     private bool timerActive = false;
 
@@ -13,6 +16,14 @@ public class MatchTimer : MonoBehaviour
     {
         timerActive = startOnAwake;
         ResetTimer();
+        _playerTime.CallbackOnValueChanged.AddListener(AdjustText);
+    }
+
+    private void AdjustText(float time)
+    {
+        string timerString = time.FreyaConvertToTimer();
+        
+        _textBox.text = timerString;
     }
 
     private void Update()
@@ -22,7 +33,7 @@ public class MatchTimer : MonoBehaviour
             return;
         }
         
-        PlayerTime.Value += Time.deltaTime;
+        _playerTime.Value += Time.deltaTime;
     }
 
     public void PauseTimer()
@@ -37,6 +48,6 @@ public class MatchTimer : MonoBehaviour
 
     public void ResetTimer()
     {
-        PlayerTime.Value = 0;
+        _playerTime.Value = 0;
     }
 }
