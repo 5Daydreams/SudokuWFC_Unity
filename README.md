@@ -1,4 +1,4 @@
-# SudokuSolver
+# SudokuWFC_Unity
 A 9x9 board generator for the game of Sudoku made in Unity. This EPC talk inspired me to study the WFC algorithm: [EPC2018 - Oskar Stalberg - Wave Function Collapse in Bad North](https://www.youtube.com/watch?v=0bcZb-SsnrA&t=27s&ab_channel=BUasGames). 
 
 The speed of my implementation is certainly suboptimal compared to the actual WFC algorithm, but to the human eye it can generate boards instantly:
